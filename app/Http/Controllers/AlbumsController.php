@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\ALbum;
 
 class AlbumsController extends Controller
 {
     public function index(){
-    	return view('albums.index');
+        $albums = Album::with('Photos')->get();
+    	return view('albums.index')->with('albums', $albums);
     }
 
     public function create(){
@@ -19,23 +21,35 @@ class AlbumsController extends Controller
     		'cover_image' => 'image|max: 1999',
     		]);
 
-    		//get file name with extension
-    		$filenameWithExt = $request->file('cover_image')->getClientOriginalName();
-    		
-    		//Get just the file name
-    		$filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-    	
-    		//get filename extention without .
-    		$extension = $request->file('cover_image')->getClientOriginalExtension();
+		//get file name with extension
+		$filenameWithExt = $request->file('cover_image')->getClientOriginalName();
+		
+		//Get just the file name
+		$filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+	
+		//get filename extention without .
+		$extension = $request->file('cover_image')->getClientOriginalExtension();
 
-    		//Create new filename
-    		$filenameToStore = $filename.'_'.time().'.'.$extension;
+		//Create new filename
+		$filenameToStore = $filename.'_'.time().'.'.$extension;
 
-    		//Upload Image
-    		$path = $request->file('cover_image')->storeAs('public/album_covers', $filenameToStore);
+		//Upload Image
+		$path = $request->file('cover_image')->storeAs('public/album_covers', $filenameToStore);
     	
+        //Create Album
+        $album = new ALbum;
+    	$album->name = $request->input('name');
+        $album->description = $request->input('description');
+        $album->cover_image = $filenameToStore;
 
-    	return $path;
+        $album->save();
+
+        return redirect('/albums')->with('success', 'Album Created'); 
     	
+    }
+
+    public function show($id){
+        $album = Album::with('Photos')->find($id);
+        return view('albums.show')->with('album', $album);
     }
 }
