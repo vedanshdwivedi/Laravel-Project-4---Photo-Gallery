@@ -30,7 +30,7 @@ class PhotosController extends Controller
 		$filenameToStore = $filename.'_'.time().'.'.$extension;
 
 		//Upload Image
-		$path = $request->file('photo')->storeAs('public/photos'.$request->input('album_id'), $filenameToStore);
+		$path = $request->file('photo')->storeAs('public/photos/'.$request->input('album_id'), $filenameToStore);
     	
         //Upload Photo
         $photo = new Photo;
@@ -43,5 +43,6 @@ class PhotosController extends Controller
         $photo->save();
 
         return redirect('/albums/'.$request->input('album_id'))->with('success', 'Photo Uploaded'); 
+        
     }
 }
